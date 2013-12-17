@@ -11,6 +11,14 @@
 
   3. 向你的微信公众号发送消息并测试吧！
 
+
+安装方法
+----
+### composer
+```shell
+composer require iamfat/wechat dev-master
+```
+
 用法
 -----
 
@@ -164,4 +172,3 @@ TODO
 -----
 1. 完善文档和注释；
 2. 完善异常处理；
-3. 提供 Composer 方式安装。
