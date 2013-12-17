@@ -1,0 +1,23 @@
+{
+    "name": "iamfat/wechat",
+    "type": "library",
+    "description": "Composer Support for Netputer Wechat PHP SDK",
+    "keywords": ["wechat", "php", "sdk"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "NetPuter",
+            "email": "netputer@gmail.com"
+        },
+        {
+            "name": "Jia Huang",
+            "email": "iamfat@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-0": { "Wechat": "src/" }
+    }
+}
