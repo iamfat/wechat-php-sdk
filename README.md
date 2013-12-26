@@ -171,7 +171,7 @@ echo $response;
 
 ```
 
-如果你是使用框架, 希望另行导入$_GET和原始POST数据$GLOBALS['HTTP_RAW_POST_DATA'], handleRequest可以传入参数
+如果你是使用框架, 希望另行导入`$_GET`和原始POST数据`$GLOBALS['HTTP_RAW_POST_DATA']`, handleRequest可以传入参数
 ```php
 $response = $wechat->handleRequest(['get'=>$your_get_data, 'post'=>$your_post_data])
 ```
