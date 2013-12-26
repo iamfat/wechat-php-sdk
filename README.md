@@ -27,7 +27,7 @@ composer require iamfat/wechat dev-master
 通过继承 `Wechat` 类进行扩展，通过重写 `onSubscribe()` 等方法响应关注等请求：
 
 ```php
-class MyWechat extends Wechat {
+class MyWechat extends \Wechat\Server {
   protected function onSubscribe() {} // 用户关注
   protected function onUnsubscribe() {} // 用户取消关注
 
@@ -157,15 +157,23 @@ $items[] = new NewsResponseItem(
 ```
 -----
 
-最后，实例化 `MyWechat()` 并调用 `run()` 方法即可运行。
+最后，实例化 `MyWechat()` 并调用 `handleRequest()` 方法即可运行。
 
 ```php
-$wechat = new MyWechat(
-  $token,  // 你在公众平台设置的 Token
-  $debug   // 调试模式，默认为 FALSE ，设为 TRUE 后可将错误通过文本消息回复显示
-);
 
-$wechat->run();
+// $token是你在公众平台设置的 Token
+$wechat = new MyWechat($token);
+
+$response = $wechat->handleRequest();   
+// $response是个返回的对象
+// 通过(string)$response强制类型转换能获得返回给公众平台的XML字符串
+echo $response; 
+
+```
+
+如果你是使用框架, 希望另行导入$_GET和原始POST数据$GLOBALS['HTTP_RAW_POST_DATA'], handleRequest可以传入参数
+```php
+$response = $wechat->handleRequest(['get'=>$your_get_data, 'post'=>$your_post_data])
 ```
 
 TODO

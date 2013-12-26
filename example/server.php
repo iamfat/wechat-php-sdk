@@ -121,5 +121,6 @@
 
   }
 
-  $wechat = new MyWechat('weixin', TRUE);
-  $wechat->run();
+  $wechat = new MyWechat('weixin');
+  $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
+  echo $response;

@@ -2,14 +2,14 @@
 /**
  * 微信公众平台 PHP SDK
  *
- * @author     Ian Li <i@techotaku.net>, NetPuter <netputer@gmail.com>
+ * @author     Ian Li <i@techotaku.net>, NetPuter <netputer@gmail.com>, Jia Huang <iamfat@gmail.com>
  * @license    MIT License
  */ 
 
   /**
    * 测试对象
    */
-  class MyWechat extends Wechat {
+  class MyWechat extends \Wechat\Server {
 
     /**
      * 方法getRequest的测试钩子
@@ -22,21 +22,21 @@
      * 方法responseText的测试钩子
      */
     public function publicResponseText($content, $funcFlag = 0) {
-      parent::responseText($content, $funcFlag);
+      return parent::responseText($content, $funcFlag);
     }
 
     /**
      * 方法responseMusic的测试钩子
      */
     public function publicResponseMusic($title, $description, $musicUrl, $hqMusicUrl, $funcFlag = 0) {
-      parent::responseMusic($title, $description, $musicUrl, $hqMusicUrl, $funcFlag);
+      return parent::responseMusic($title, $description, $musicUrl, $hqMusicUrl, $funcFlag);
     }
 
     /**
      * 方法responseNews的测试钩子
      */
     public function publicResponseNews($items, $funcFlag = 0) {
-      parent::responseNews($items, $funcFlag);
+      return parent::responseNews($items, $funcFlag);
     }
 
 

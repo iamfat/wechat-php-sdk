@@ -1,173 +1,125 @@
 <?php
 /**
- * 微信公众平台 PHP SDK
- *
- * @author     Ian Li <i@techotaku.net>, NetPuter <netputer@gmail.com>
- * @license    MIT License
- */
+* 微信公众平台 PHP SDK
+*
+* @author     Ian Li <i@techotaku.net>, NetPuter <netputer@gmail.com>
+* @license    MIT License
+*/
   
-  require_once __DIR__ . '/SdkTestBase.php';
+require_once __DIR__ . '/SdkTestBase.php';
 
-  /**
-   * Event Test
-   */
-  class WechatSdkEventTest extends WechatSdkTestBase {
+/**
+* Event Test
+*/
+class WechatSdkEventTest extends WechatSdkTestBase {
     protected $mockBuilder;
 
     protected function setUp() {
-      parent::setUp();
+        parent::setUp();
 
-      $this->mockBuilder = $this->getMockBuilder('MyWechat')
-                                ->setMethods(array('onSubscribe', 'onUnsubscribe', 'onText', 'onImage', 'onLocation', 'onLink', 'onUnknown'))
-                                ->setConstructorArgs(array($this->token));
+        $this->mockBuilder = $this->getMockBuilder('MyWechat')
+            ->setMethods(array('onSubscribe', 'onUnsubscribe', 'onText', 'onImage', 'onLocation', 'onLink', 'onUnknown'))
+                ->setConstructorArgs(array($this->token));
     }
 
     public function testGeneralFields() {
-      ExitTestHelper::init();
 
-      $this->fillTextMsg('填充消息');
-      $wechat = $this->mockBuilder->getMock();
+        $this->fillTextMsg('填充消息');
+        $wechat = $this->mockBuilder->getMock();
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      // 无需执行run()， 所有字段应已解析完毕
-      $this->assertEquals($this->toUser, $wechat->publicGetRequest('tousername'));
-      $this->assertEquals($this->fromUser, $wechat->publicGetRequest('fromusername'));
-      $this->assertEquals($this->time, $wechat->publicGetRequest('createtime'));
-      $this->assertEquals($this->msgid, $wechat->publicGetRequest('msgid'));
-
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-      ExitTestHelper::clean();
+        // 无需执行run()， 所有字段应已解析完毕
+        $this->assertEquals($this->toUser, $wechat->publicGetRequest('tousername'));
+        $this->assertEquals($this->fromUser, $wechat->publicGetRequest('fromusername'));
+        $this->assertEquals($this->time, $wechat->publicGetRequest('createtime'));
+        $this->assertEquals($this->msgid, $wechat->publicGetRequest('msgid'));
 
     }
 
     public function testEventOnSubscribe() {
-      ExitTestHelper::init();
 
-      $this->fillEvent('subscribe');
-      $wechat = $this->mockBuilder->getMock();
-      $wechat->expects($this->once())
-             ->method('onSubscribe');
+        $this->fillEvent('subscribe');
+        $wechat = $this->mockBuilder->getMock();
+        $wechat->expects($this->once())
+            ->method('onSubscribe');
 
-      $wechat->run();
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      $this->assertEquals('', $wechat->publicGetRequest('eventkey'));
-
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-
-      ExitTestHelper::clean();
+        $this->assertEquals('', $wechat->publicGetRequest('eventkey'));
     }
 
     public function testEventOnUnsubscribe() {
-      ExitTestHelper::init();
 
-      $this->fillEvent('unsubscribe');
-      $wechat = $this->mockBuilder->getMock();
-      $wechat->expects($this->once())
-             ->method('onUnsubscribe');
+        $this->fillEvent('unsubscribe');
+        $wechat = $this->mockBuilder->getMock();
+        $wechat->expects($this->once())
+            ->method('onUnsubscribe');
 
-      $wechat->run();
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      $this->assertEquals('', $wechat->publicGetRequest('eventkey'));
+        $this->assertEquals('', $wechat->publicGetRequest('eventkey'));
 
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-
-      ExitTestHelper::clean();
     }
 
     public function testEventOnUnknown() {
-      ExitTestHelper::init();
 
-      $this->fillUnknown('unknown info');
-      $wechat = $this->mockBuilder->getMock();
-      $wechat->expects($this->once())
-             ->method('onUnknown');
+        $this->fillUnknown('unknown info');
+        $wechat = $this->mockBuilder->getMock();
+        $wechat->expects($this->once())
+            ->method('onUnknown');
 
-      $wechat->run();
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      $this->assertEquals('unknown info', $wechat->publicGetRequest('unknown'));
-
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-
-      ExitTestHelper::clean();
+        $this->assertEquals('unknown info', $wechat->publicGetRequest('unknown'));
     }
 
     public function testEventOnText() {
-      ExitTestHelper::init();
 
-      $this->fillTextMsg('填充文本消息');
-      $wechat = $this->mockBuilder->getMock();
-      $wechat->expects($this->once())
-             ->method('onText');
+        $this->fillTextMsg('填充文本消息');
+        $wechat = $this->mockBuilder->getMock();
+        $wechat->expects($this->once())
+            ->method('onText');
 
-      $wechat->run();
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      $this->assertEquals('填充文本消息', $wechat->publicGetRequest('content'));
-
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-
-      ExitTestHelper::clean();
+        $this->assertEquals('填充文本消息', $wechat->publicGetRequest('content'));
     }
 
     public function testEventOnImage() {
-      ExitTestHelper::init();
 
-      $this->fillImageMsg('https://travis-ci.org/netputer/wechat-php-sdk.png');
-      $wechat = $this->mockBuilder->getMock();
-      $wechat->expects($this->once())
-             ->method('onImage');
+        $this->fillImageMsg('https://travis-ci.org/netputer/wechat-php-sdk.png');
+        $wechat = $this->mockBuilder->getMock();
+        $wechat->expects($this->once())
+            ->method('onImage');
 
-      $wechat->run();
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      $this->assertEquals('https://travis-ci.org/netputer/wechat-php-sdk.png', $wechat->publicGetRequest('picurl'));
-
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-
-      ExitTestHelper::clean();
+        $this->assertEquals('https://travis-ci.org/netputer/wechat-php-sdk.png', $wechat->publicGetRequest('picurl'));
     }
 
     public function testEventOnLocation() {
-      ExitTestHelper::init();
+        $this->fillLocationMsg('23.134521', '113.358803');
+        $wechat = $this->mockBuilder->getMock();
+        $wechat->expects($this->once())
+            ->method('onLocation');
 
-      $this->fillLocationMsg('23.134521', '113.358803');
-      $wechat = $this->mockBuilder->getMock();
-      $wechat->expects($this->once())
-             ->method('onLocation');
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      $wechat->run();
-
-      $this->assertEquals('23.134521', $wechat->publicGetRequest('location_x'));
-      $this->assertEquals('113.358803', $wechat->publicGetRequest('location_y'));
-
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-
-      ExitTestHelper::clean();
+        $this->assertEquals('23.134521', $wechat->publicGetRequest('location_x'));
+        $this->assertEquals('113.358803', $wechat->publicGetRequest('location_y'));
     }
 
     public function testEventOnLink() {
-      ExitTestHelper::init();
+        $this->fillLinkMsg('netputer/wechat-php-sdk', '微信公众平台 PHP SDK', 'https://github.com/netputer/wechat-php-sdk');
+        $wechat = $this->mockBuilder->getMock();
+        $wechat->expects($this->once())
+            ->method('onLink');
 
-      $this->fillLinkMsg('netputer/wechat-php-sdk', '微信公众平台 PHP SDK', 'https://github.com/netputer/wechat-php-sdk');
-      $wechat = $this->mockBuilder->getMock();
-      $wechat->expects($this->once())
-             ->method('onLink');
+        $response = $wechat->handleRequest(['get'=>$_GET, 'post'=>$GLOBALS['HTTP_RAW_POST_DATA']]);
 
-      $wechat->run();
-
-      $this->assertEquals('netputer/wechat-php-sdk', $wechat->publicGetRequest('title'));
-      $this->assertEquals('微信公众平台 PHP SDK', $wechat->publicGetRequest('description'));
-      $this->assertEquals('https://github.com/netputer/wechat-php-sdk', $wechat->publicGetRequest('url'));
-
-      // 应无exit
-      $this->assertFalse(ExitTestHelper::isThereExit(), "There shouldn't be any exit() was invoked.");
-
-      ExitTestHelper::clean();
+        $this->assertEquals('netputer/wechat-php-sdk', $wechat->publicGetRequest('title'));
+        $this->assertEquals('微信公众平台 PHP SDK', $wechat->publicGetRequest('description'));
+        $this->assertEquals('https://github.com/netputer/wechat-php-sdk', $wechat->publicGetRequest('url'));
     }
 
-  }
-?>
+}
