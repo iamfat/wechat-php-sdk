@@ -303,22 +303,18 @@ namespace Wechat {
 
     }
 
-    interface Response {
-        public function __toString();
-    }
-
-    class RawResponse implements Response {
-       
-        protected $content;
+    class SimpleXMLCData {
         
-        public function __construct($content) {
-            $this->content = $content;
+        private $_text;
+        
+        function __construct($text) {
+            $this->_text = $text;
         }
         
-        public function __toString() {
-            return $this->content;
+        function __toString() {
+            return $this->_text;
         }
-
+        
     }
     
     class SimpleXMLElement extends \SimpleXMLElement {
@@ -342,8 +338,39 @@ namespace Wechat {
 
         }
         
+        public function addChild($key, $value=null, $namespace=null) {
+            if ($value instanceof SimpleXMLCData) {
+                $this->$key = null;
+                $node = dom_import_simplexml($this->$key); 
+                $doc = $node->ownerDocument;
+                $node->appendChild($doc->createCDATASection((string)$value)); 
+                return $this;
+            }
+            else {
+                return parent::addChild($key, $value, $namespace);
+            }
+        }
+        
     }
 
+    interface Response {
+        public function __toString();
+    }
+
+    class RawResponse implements Response {
+       
+        protected $content;
+        
+        public function __construct($content) {
+            $this->content = $content;
+        }
+        
+        public function __toString() {
+            return $this->content;
+        }
+
+    }
+    
     /**
     * 用于回复的基本消息类型
     */
@@ -354,10 +381,10 @@ namespace Wechat {
 
         public function __construct($toUserName, $fromUserName, $funcFlag) {
             $root = new SimpleXMLElement('<root/>');
-            $root->xml = '';
+            $root->xml = NULL;
             $this->xml = $root->xml;
-            $this->xml->ToUserName = $toUserName;
-            $this->xml->FromUserName = $fromUserName;
+            $this->xml->addChild('ToUserName', new SimpleXMLCData($toUserName));
+            $this->xml->addChild('FromUserName', new SimpleXMLCData($fromUserName));
             $this->xml->CreateTime = time();
             $this->xml->FuncFlag = $funcFlag;
         }
@@ -375,8 +402,8 @@ namespace Wechat {
 
         public function __construct($toUserName, $fromUserName, $content, $funcFlag = 0) {
             parent::__construct($toUserName, $fromUserName, $funcFlag);
-            $this->xml->MsgType = 'text';
-            $this->xml->Content = $content;
+            $this->xml->addChild('MsgType', new SimpleXMLCData('text'));
+            $this->xml->addChild('Content', new SimpleXMLCData($content));
         }
 
     }
@@ -391,14 +418,15 @@ namespace Wechat {
             
             parent::__construct($toUserName, $fromUserName, $funcFlag);
 
-            $this->xml->CreateTime = time();
-            $this->xml->MsgType = 'music';
-            $music = $this->xml->addChild('Music');
-            $music->Title = $title;
-            $music->Description = $description;
-            $music->MusicUrl = $musicUrl;
-            $music->HQMusicUrl = $hqMusicUrl;
-            $this->xml->FuncFlag = $funcFlag;
+            $this->xml->addChild('MsgType', new SimpleXMLCData('music'));
+
+            $this->xml->Music = null;
+            $music = $this->xml->Music;
+
+            $music->addChild('Title', new SimpleXMLCData($title));
+            $music->addChild('Description', new SimpleXMLCData($description));
+            $music->addChild('MusicUrl', new SimpleXMLCData($musicUrl));
+            $music->addChild('HQMusicUrl', new SimpleXMLCData($hqMusicUrl));
         }
 
     }
@@ -411,12 +439,14 @@ namespace Wechat {
         public function __construct($toUserName, $fromUserName, $items, $funcFlag) {
             parent::__construct($toUserName, $fromUserName, $funcFlag);
 
-            $this->xml->MsgType = 'news';
+            $this->xml->addChild('MsgType', new SimpleXMLCData('news'));
+            
             $this->xml->ArticleCount = count($items);
-            $this->xml->Articles = '';
+            $this->xml->Articles = null;
+            $articles = $this->xml->Articles;
                     
             foreach ($items as $item) {
-                $this->xml->Articles->append($item->xml);
+                $articles->append($item->xml);
             }
                     
         }
@@ -433,10 +463,11 @@ namespace Wechat {
         public function __construct($title, $description, $picUrl, $url) {
             $this->xml = new SimpleXMLElement('<item/>');
                         
-            $this->xml->Title = $title;
-            $this->xml->Description = $description;
-            $this->xml->PicUrl = $picUrl;
-            $this->xml->Url = $url;
+            $this->xml->addChild('Title', new SimpleXMLCData($title));
+            $this->xml->addChild('Description', new SimpleXMLCData($description));
+            $this->xml->addChild('PicUrl', new SimpleXMLCData($picUrl));
+            $this->xml->addChild('Url', new SimpleXMLCData($url));
+
         }
 
     }
