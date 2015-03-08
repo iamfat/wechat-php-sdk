@@ -2,35 +2,43 @@
 
 namespace Wechat {
 
-    class HTTP {
-    
+    class HTTP
+    {
         private $_header = [];
         private $_post = [];
         private $_get = [];
-    
-        function header($name , $value) {
-            $this->_header[$name]=$value;
+
+        public function header($name, $value)
+        {
+            $this->_header[$name] = $value;
+
             return $this;
         }
-    
-        function get($url, $query, $timeout=5) {
+
+        public function get($url, $query, $timeout = 5)
+        {
             $qpos = strpos($url, '?');
             $url .= ($qpos === false) ? '?' : '&';
             $url .= is_string($query) ? $query : http_build_query($query);
+
             return $this->request($url, $timeout);
         }
-    
-        function post($url, $query, $timeout=5) {
+
+        public function post($url, $query, $timeout = 5)
+        {
             $this->_post = $query;
+
             return $this->request($url, $timeout);
         }
-    
-        function clean(){
+
+        public function clean()
+        {
             $this->_header = [];
             $this->_post = [];
         }
 
-        function & request($url, $timeout=5){
+        public function & request($url, $timeout = 5)
+        {
             $ch = curl_init();
             curl_setopt_array($ch, array(
                 CURLOPT_SSL_VERIFYPEER => false,
@@ -62,10 +70,10 @@ namespace Wechat {
                 ));
             }
 
-            if($this->_header){
-                $curl_header=array();
-                foreach($this->_header as $k=>$v){
-                    $curl_header[]=$k.': '.$v;
+            if ($this->_header) {
+                $curl_header = array();
+                foreach ($this->_header as $k => $v) {
+                    $curl_header[] = $k.': '.$v;
                 }
                 curl_setopt($ch, CURLOPT_HTTPHEADER, $curl_header);
             }
@@ -74,7 +82,7 @@ namespace Wechat {
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, is_array($this->_post) ? http_build_query($this->_post) : $this->_post);
             }
-        
+
             $data = curl_exec($ch);
 
             $this->clean();
@@ -84,30 +92,30 @@ namespace Wechat {
                 $err = curl_error($ch);
                 _LOG("CURL ERROR($errno $err): $url ", 'error');
                 curl_close($ch);
-                return null;
+
+                return;
             }
 
             $info = curl_getinfo($ch);
 
             curl_close($ch);
-        
+
             return new HTTP_Response($data, $info['http_code']);
         }
-
-    
     }
 
-    class HTTP_Response {
+    class HTTP_Response
+    {
+        public $header = [];
+        public $status = null;
+        public $body = null;
 
-        public $header=[];
-        public $status=null;
-        public $body=null;
-    
-        function __construct($data, $status) {
-            list($header, $body)=explode("\n\n", str_replace("\r", "", $data), 2);
-        
-            $this->body=trim($body);
- 
+        public function __construct($data, $status)
+        {
+            list($header, $body) = explode("\n\n", str_replace("\r", "", $data), 2);
+
+            $this->body = trim($body);
+
             $header = explode("\n", $header);
             $status = array_shift($header);
             $this->status = $status;
@@ -119,11 +127,11 @@ namespace Wechat {
                 }
             }
         }
-    
-        function __toString() {
+
+        public function __toString()
+        {
             return $this->body;
         }
     }
 
 }
-

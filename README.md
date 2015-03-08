@@ -1,8 +1,6 @@
-微信公众平台 PHP SDK
-=====
+# 微信公众平台 PHP SDK
 
-介绍
------
+## 介绍
 简单的微信公众平台 PHP SDK ，通过调用相应的接口，使你可以轻松地开发微信 App 。测试方法如下：
 
   1. Clone 或下载项目源码，上传至服务器。
@@ -12,16 +10,14 @@
   3. 向你的微信公众号发送消息并测试吧！
 
 
-安装方法
-----
+## 安装方法
 ### composer
 ```shell
 composer require iamfat/wechat dev-master
 ```
 
-用法
------
-
+## 用法
+### 服务端
 直接浏览 `/example/server.php` 了解基本用法，以下为详细说明。
 
 通过继承 `Wechat` 类进行扩展，通过重写 `onSubscribe()` 等方法响应关注等请求：
@@ -174,6 +170,29 @@ echo $response;
 如果你是使用框架, 希望另行导入`$_GET`和原始POST数据`$GLOBALS['HTTP_RAW_POST_DATA']`, handleRequest可以传入参数
 ```php
 $response = $wechat->handleRequest(['get'=>$your_get_data, 'post'=>$your_post_data])
+```
+
+### 单点登录
+```php
+$oauth = new \Wechat\OAuth($appId, $appSecret);
+$openId = $oauth->getOpenId();  // OpenID会存储在`$_SESSION`中, 如果没有的话会自动触发HTTP跳转
+```
+
+### 应用接口
+```php
+$app = new \Wechat\App($appId, $appSecret);
+// 获取`acess_token`
+$token = $app->getAccessToken();
+// 获取用户信息
+$info = $app->getUserInfo($openId);
+// 获取二维码数据
+$qrdata = $app->getQRCode($sceneId, $permanent); // $permanent 是否是永久场景, 默认为false
+
+// 获取JS相关信息
+$js = new \Wechat\JS($app);
+$url = 'http://path/to/api';
+$package = $js->getSignPackage($url);   // 获取签名包
+// appId, nonceStr, timestamp, url, signature, rawString
 ```
 
 TODO
