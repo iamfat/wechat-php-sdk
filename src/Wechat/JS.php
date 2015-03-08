@@ -18,12 +18,7 @@ class JS
         $nonceStr = $this->_createNonceStr();
 
         // 这里参数的顺序要按照 key 值 ASCII 码升序排序
-        $string = http_build_query([
-            'jsapi_ticket' => $ticket,
-            'noncestr' => $nonceStr,
-            'timestampe' => $timestamp,
-            'url' => $url,
-        ]);
+        $string = "jsapi_ticket={$ticket}&noncestr={$nonceStr}&timestamp={$timestamp}&url={$url}";
 
         $signature = sha1($string);
 
