@@ -90,7 +90,7 @@ namespace Wechat {
             $errno = curl_errno($ch);
             if ($errno || !$data) {
                 $err = curl_error($ch);
-                _LOG("CURL ERROR($errno $err): $url ", 'error');
+                error_log("[Wechat-SDK] CURL ERROR($errno $err): $url ");
                 curl_close($ch);
 
                 return;
