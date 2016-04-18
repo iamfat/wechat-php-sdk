@@ -39,7 +39,7 @@ class OAuth
                     'appid' => $this->_appId,
                     'redirect_uri' =>  URL('', $_GET),
                     'response_type' => 'code',
-                    'scope' => 'snsapi_userinfo',
+                    'scope' => 'snsapi_userinfo,snsapi_login',
                     'state' => $state,
                 ], 'wechat_redirect');
                 header('Location: '.$url);
@@ -53,7 +53,6 @@ class OAuth
     public function getOpenId()
     {
         $token = $this->getAccessToken();
-
         return isset($token['openid']) ? $token['openid'] : false;
     }
 }
