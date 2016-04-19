@@ -56,13 +56,13 @@ class OAuth
         return isset($token['openid']) ? $token['openid'] : false;
     }
 
-    public function getUserInfo($openid)
+    public function getUserInfo()
     {
         $token = $this->getAccessToken();
         $response = $this->_http
             ->get("https://api.weixin.qq.com/sns/userinfo", [
                 'access_token' => $token['access_token'],
-                'openid' => $openid,
+                'openid' => $token['openid'],
             ]);
 
         return @json_decode($response->body, true);
