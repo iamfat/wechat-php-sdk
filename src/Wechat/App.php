@@ -116,6 +116,19 @@ class App
         return @json_decode($response->body, true) ?: false;
     }
 
+    public function getLoginQRCodeUrl($redirectUri=null) {
+        if ($redirectUri === null) {
+            $redirectUri = URL('', $_GET);
+        }
+
+        return URL('https://open.weixin.qq.com/connect/qrconnect#wechat_redirect', [
+            'appid' => $this->_appId,
+            'redirect_uri' => $redirectUri,
+            'response_type' => 'code',
+            'scope' => 'snsapi_login',
+        ]);
+    }
+
     public function getOAuth()
     {
         return new OAuth($this->_appId, $this->_appSecret);
