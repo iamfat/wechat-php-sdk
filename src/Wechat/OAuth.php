@@ -30,6 +30,7 @@ class OAuth
                 $response = $this->_http->get($url, '');
                 $rdata = @json_decode($response->body, true);
                 if (isset($rdata['access_token'])) {
+                    $rdata['etime'] = time() + $rdata['expires_in'];
                     $_SESSION['wechat.access_token'][$this->_appId] = $rdata;
                 }
             } else {
@@ -50,6 +51,27 @@ class OAuth
         return $_SESSION['wechat.access_token'][$this->_appId] ?: false;
     }
 
+    public function refreshToken()
+    {
+        $token = $_SESSION['wechat.access_token'][$this->_appId];
+        if (!$token || !isset($token['refresh_token'])) {
+            return false;
+        }
+
+        $url = URL('https://api.weixin.qq.com/sns/oauth2/refresh_token', [
+            'appid' => $this->_appId,
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $token['refresh_token']
+        ]);
+        $response = $this->_http->get($url, '');
+        $token = @json_decode($response->body, true);
+        if (isset($token['access_token'])) {
+            $token['etime'] = time() + $token['expires_in'];
+            $_SESSION['wechat.access_token'][$this->_appId] = $token;
+        }
+        return $token ?: false;
+    }
+
     public function getOpenId()
     {
         $token = $this->getAccessToken();
@@ -59,12 +81,15 @@ class OAuth
     public function getUserInfo()
     {
         $token = $this->getAccessToken();
+        if ($token['etime'] < time()) {
+            $token = $this->refreshToken();
+        }
+
         $response = $this->_http
             ->get("https://api.weixin.qq.com/sns/userinfo", [
                 'access_token' => $token['access_token'],
                 'openid' => $token['openid'],
             ]);
-
         return @json_decode($response->body, true);
     }
 
