@@ -33,24 +33,30 @@ class App
     public function getAccessToken()
     {
         $file = $this->getStoragePath("token.json");
-        $data = @json_decode(file_get_contents($file), true);
-        if (!isset($data['token']) || $data['etime'] < time()) {
-            $response = $this->_http->get('https://api.weixin.qq.com/cgi-bin/token', [
-               'grant_type' => 'client_credential',
-               'appid' => $this->_appId,
-               'secret' => $this->_appSecret
-            ]);
+        $fh = fopen($file, 'c+');
+        if (flock($fh, LOCK_EX)) {
+            $data = @json_decode(fread($fh, filesize($file)), true);
+            if (!isset($data['token']) || $data['etime'] < time()) {
+                $response = $this->_http->get('https://api.weixin.qq.com/cgi-bin/token', [
+                   'grant_type' => 'client_credential',
+                   'appid' => $this->_appId,
+                   'secret' => $this->_appSecret
+                ]);
 
-            $rdata = @json_decode($response->body, true);
-            if (isset($rdata['access_token'])) {
-                $data['token'] = $rdata['access_token'];
-                $data['etime'] =  time() + $rdata['expires_in'];
-                // update to permanent storage
-                file_put_contents($file, J($data));
+                $rdata = @json_decode($response->body, true);
+                if (isset($rdata['access_token'])) {
+                    $data['token'] = $rdata['access_token'];
+                    $data['etime'] =  time() + $rdata['expires_in'] - 20;
+                    // update to permanent storage
+                    ftruncate($fh, 0);
+                    fwrite($fh, J($data));
+                    fflush($fh);
+                }
             }
+            flock($fh, LOCK_UN);
+            fclose($fh);
+            return $data['token'];
         }
-
-        return $data['token'];
     }
 
     public function getUserInfo($openid)
@@ -73,28 +79,32 @@ class App
     {
         // jsapi_ticket 应该全局存储与更新，以下代码以写入到文件中做示例
         $file = $this->getStoragePath("ticket_{$type}.json");
-        $data = @json_decode(file_get_contents($file), true);
-        if (!isset($data['ticket']) || $data['etime'] < time()) {
-            $token = $this->getAccessToken();
-            if (!$token) {
-                return false;
-            }
+        $fh = fopen($file, 'c+');
+        if (flock($fh, LOCK_EX)) {
+            $data = @json_decode(fread($fh, filesize($file)), true);
+            if (!isset($data['ticket']) || $data['etime'] < time()) {
+                $token = $this->getAccessToken();
+                if ($token) {
+                    $http = new HTTP();
+                    $response = $http->get('https://api.weixin.qq.com/cgi-bin/ticket/getticket', [
+                        'type' => $type,
+                        'access_token' => $token,
+                    ]);
 
-            $http = new HTTP();
-            $response = $http->get('https://api.weixin.qq.com/cgi-bin/ticket/getticket', [
-                'type' => $type,
-                'access_token' => $token,
-            ]);
-
-            $rdata = @json_decode($response->body, true);
-            if (isset($rdata['ticket'])) {
-                $data['ticket'] = $rdata['ticket'];
-                $data['etime'] = time() + $data['expires_in'];
-                file_put_contents($file, J($data));
+                    $rdata = @json_decode($response->body, true);
+                    if (isset($rdata['ticket'])) {
+                        $data['ticket'] = $rdata['ticket'];
+                        $data['etime'] = time() + $data['expires_in'];
+                        ftruncate($fh, 0);
+                        fwrite($fh, J($data));
+                        fflush($fh);
+                    }
+                }
             }
+            flock($fh, LOCK_UN);
+            fclose($fh);
+            return $data['ticket'];
         }
-
-        return $data['ticket'];
     }
 
     public function getQRCode($sceneId, $permanent = false)
