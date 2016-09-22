@@ -172,4 +172,39 @@ class App
     {
         return new OAuth($this->_appId, $this->_appSecret);
     }
+
+    public function sendTemplateMessage($openId, $templateId, $data) {
+
+        $msgUrl = $data['url'];
+        $msgTopColor = $data['topcolor'] ?: '#999999';
+        unset($data['url']);
+        unset($data['topcolor']);
+
+        $token = $this->getAccessToken();
+
+        $rdata = false;
+        for($i=0;$i<3;$i++) {
+            if (!$token) {
+                break;
+            }
+
+            $url = URL('https://api.weixin.qq.com/cgi-bin/message/template/send', ['access_token' => $token]);
+            $response = $this->_http->post($url, J([
+                'touser' => $openId,
+                'template_id' => $templateId,
+                'url' => $msgUrl,
+                'topcolor' => $msgTopColor,
+                'data' => $data,
+            ]));
+
+            $rdata = @json_decode($response->body, true);
+            if ($rdata['errcode'] == 40001) {
+                $token = $this->getAccessToken(true);
+            } else {
+                break;
+            }
+        }
+
+        return $rdata;
+    }
 }

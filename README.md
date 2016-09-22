@@ -193,7 +193,13 @@ $js = new \Wechat\JS($app);
 $url = 'http://path/to/api';
 $package = $js->getSignPackage($url);   // 获取签名包
 // appId, nonceStr, timestamp, url, signature, rawString
+
+// 模板消息发送
+$app->sendTemplateMessage($openId, $templateId, $data);
+// $data = ['url'=>'xxxx', 'topcolor'=>, 其他的data]
+
 ```
+
 
 TODO
 -----
